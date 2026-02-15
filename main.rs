@@ -18,13 +18,12 @@ impl fmt::Display for WrongLetters {
 }
 
 fn main() {
-  let secret_word = "apple";
+  let secret_word = "apple pan";
   let word_size = get_word_size(secret_word);
   let mut attempts = 0;
   let chances: usize = word_size + 2;
   let mut wrong_letters_list = WrongLetters::new("");
   let mut hidden = hidden_secret_word(secret_word);
-  let mut final_word = String::new();
 
   while attempts < chances {
     println!("The secret word is: {}\n", hidden);
@@ -44,10 +43,9 @@ fn main() {
       console_clear();
     } else {
       let mut chars: Vec<char> = hidden.chars().collect();
-      for (idx, chr) in secret_word.char_indices() {
+      for (idx, chr) in secret_word.chars().enumerate() {
         if letter == chr && idx < chars.len() {
           chars[idx] = letter;
-          final_word.push(letter);
         }
       }
       hidden = chars.into_iter().collect();
@@ -55,37 +53,32 @@ fn main() {
     console_clear();
     attempts += 1;
 
-    if is_winner(&final_word, secret_word) {
+    if is_winner(&hidden, secret_word) {
       println!("You won!");
-      break; 
-    } else {
-      println!("Game over!");
-    };
+      break;
+    }
+  }
+
+  if attempts == chances {
+    println!("Game over!");
   }
 }
 
 fn is_winner(final_word: &str, original_word: &str) -> bool {
-  if final_word == original_word {
-    return true;
-  }
-  false
+  final_word == original_word
 }
 
 fn hidden_secret_word(secret_word: &str) -> String {
-  let mut hidden = String::new();
-  let word_characters: Vec<char> = secret_word.chars().collect();
-
-  for letter in word_characters {
-    if letter.is_whitespace() {
-      hidden.push_str("   ");
-    }
-    hidden.push_str("_ ");
-  }
-  hidden
+  secret_word.chars()
+  .map(|c|
+    if c.is_whitespace() { ' ' } else { '_' }
+  )
+  .collect()
 }
 
 fn get_word_size(secret_word: &str) -> usize {
-  UnicodeSegmentation::graphemes(secret_word, true).count()
+  let no_space: String = secret_word.chars().filter(|c| !c.is_whitespace()).collect();
+  UnicodeSegmentation::graphemes(no_space.as_str(), true).count()
 }
 
 fn console_clear() {
